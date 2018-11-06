@@ -115,18 +115,26 @@ async function drawPostDetail(postId) {
 
   // 3. 필요한 데이터 불러오기
   // data title,body
+  // , {params}
   const {
-    data: { title, body },
-  } = await api.get('/posts/' + postId);
+    data: { title, body, user },
+  } = await api.get('/posts/' + postId, {
+    params: {
+      _expand: 'user',
+    },
+  });
   // 4. 내용 채우기
   titleEl.textContent = title;
   bodyEl.textContent = body;
+  authorEl.textContent = user.username;
   // 5. 이벤트 리스너 등록하기
   backEl.addEventListener('click', (e) => {
+    // 목록을 다시 그려주는 페이지를 출력해야하니까
     drawPostList();
   });
   // 6. 템플릿을 문서에 삽입
   rootEl.textContent = '';
+  //초기화하지않으면 추가해주는 모든게 다 보임
   rootEl.appendChild(frag);
 }
 
