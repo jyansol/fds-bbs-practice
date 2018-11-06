@@ -112,21 +112,39 @@ async function drawPostDetail(postId) {
   const authorEl = frag.querySelector('.author');
   const bodyEl = frag.querySelector('.body');
   const backEl = frag.querySelector('.back');
+  const commentListEl = frag.querySelector('.comment-list');
 
   // 3. 필요한 데이터 불러오기
   // data title,body
   // , {params}
   const {
-    data: { title, body, user },
+    data: { title, body, user, comments },
   } = await api.get('/posts/' + postId, {
     params: {
       _expand: 'user',
+      _embed: 'comments', //작성하면 속성에 추가하기
     },
   });
   // 4. 내용 채우기
   titleEl.textContent = title;
   bodyEl.textContent = body;
   authorEl.textContent = user.username;
+  //댓글 표시
+  for (const commentItem of comments) {
+    // 1. 템플릿 복사
+    const frag = document.importNode(templates.commentItem, true);
+    // 2. 요소 선택
+    const authorEl = frag.querySelector('a.uthor');
+    const bodyEl = frag.querySelector('.body');
+    const deleteEl = frag.querySelector('.delete');
+    // 3. 필요한 데이터 불러오기 - 필요없음
+    // 4. 내용 채우기
+    bodyEl.textContent = commentItem.body;
+    // 5. 이벤트 리스너 등록하기
+    // 6. 템플릿을 문서에 삽입
+    commentListEl.appendChild(frag);
+  }
+
   // 5. 이벤트 리스너 등록하기
   backEl.addEventListener('click', (e) => {
     // 목록을 다시 그려주는 페이지를 출력해야하니까
