@@ -113,6 +113,7 @@ async function drawPostDetail(postId) {
   const bodyEl = frag.querySelector('.body');
   const backEl = frag.querySelector('.back');
   const commentListEl = frag.querySelector('.comment-list');
+  const commentFormEl = frag.querySelector('.comment-form');
 
   // 3. 필요한 데이터 불러오기
   // data title,body
@@ -125,6 +126,16 @@ async function drawPostDetail(postId) {
       _embed: 'comments', //작성하면 속성에 추가하기
     },
   });
+  // 댓글의 작성자
+  const params = new URLSearchParams();
+  comments.forEach((c) => {
+    params.append('id', c.userId);
+    //append하면 쿼리스트링
+  });
+  //const userList = res.data === {data: userList}
+  const { data: userList } = await api.get('/users', {
+    params,
+  });
   // 4. 내용 채우기
   titleEl.textContent = title;
   bodyEl.textContent = body;
@@ -134,13 +145,27 @@ async function drawPostDetail(postId) {
     // 1. 템플릿 복사
     const frag = document.importNode(templates.commentItem, true);
     // 2. 요소 선택
-    const authorEl = frag.querySelector('a.uthor');
+    const authorEl = frag.querySelector('.author');
     const bodyEl = frag.querySelector('.body');
     const deleteEl = frag.querySelector('.delete');
+
     // 3. 필요한 데이터 불러오기 - 필요없음
+
     // 4. 내용 채우기
     bodyEl.textContent = commentItem.body;
+    const user = userList.find((item) => item.id === commentItem.userId);
+    authorEl.textContent = user.username;
+
     // 5. 이벤트 리스너 등록하기
+    commentFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = e.target.elements.body.value;
+      await api.post(`/posts/${postId}/comments`, {
+        body,
+      });
+      drawPostDetail(postId);
+    });
+
     // 6. 템플릿을 문서에 삽입
     commentListEl.appendChild(frag);
   }
